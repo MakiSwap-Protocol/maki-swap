@@ -1,0 +1,34 @@
+{
+  "name": "maki-swap",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "truffle migrate --reset",
+    "compile": "truffle compile",
+    "test": "npx buidler test",
+    "coverage": "npx buidler coverage",
+    "flatten:factory": "truffle-flattener ./contracts/exchange/MakiswapFactory.sol > ./flats/MakiswapFactory_flat.sol && truffle-flattener ./contracts/exchange/MakiswapRouter.sol > ./flats/MakiswapRouter_flat.sol",
+  },
+  "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "maki-swap-lib": "^0.0.2",
+    "maki-swap-periphery": "^1.2.2",
+    "makiswap-core": "^0.1.3",
+    "truffle": "^5.1.58",
+    "truffle-flattener": "^1.4.4"
+  },
+  "devDependencies": {
+    "@nomiclabs/buidler": "^1.4.8",
+    "@nomiclabs/buidler-ethers": "^2.0.2",
+    "@nomiclabs/buidler-truffle5": "^1.3.4",
+    "@nomiclabs/buidler-waffle": "^2.1.0",
+    "@nomiclabs/buidler-web3": "^1.3.4",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.0.32",
+    "solidity-coverage": "^0.7.16",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "truffle-plugin-verify": "^0.5.7",
+    "web3": "^1.3.4"
+  }
+}

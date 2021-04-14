@@ -1,0 +1,5 @@
+{
+    "solidity.defaultCompiler": "localFile",
+    "solidity.compileUsingLocalVersion": "/Users/Uni/Documents/GitHub/makiswap/maki-swap/soljson-v0.6.6+commit.6c089d02.js",
+    "solidity.compileUsingRemoteVersion": ""
+}

@@ -2,11 +2,12 @@
 
 pragma solidity >=0.5.16;
 
-import "makiswap-core/contracts/MakiswapHRC20.sol";
-import "makiswap-core/contracts/libraries/Math.sol";
-import "makiswap-core/contracts/interfaces/IMakiswapCallee.sol";
-import "makiswap-core/contracts/interfaces/IMakiswapFactory.sol";
-import "maki-swap-lib/contracts/token/HRC20/IHRC20.sol";
+import "./MakiswapHRC20.sol";
+import "../interfaces/IMakiswapCallee.sol";
+import '../interfaces/IMakiswapPair.sol';
+import "../interfaces/IMakiswapFactory.sol";
+
+import 'makiswap-core/contracts/interfaces/IHRC20.sol';
 import "makiswap-core/contracts/libraries/UQ112x112.sol";
 
 interface IMigrator {
@@ -14,14 +15,13 @@ interface IMigrator {
     function desiredLiquidity() external view returns (uint256);
 }
 
-contract MakiswapPair is MakiswapHRC20 {
-    using SafeMath for uint256;
+contract MakiswapPair is IMakiswapPair, MakiswapHRC20 {
+    using SafeMath for uint;
     using UQ112x112 for uint224;
 
     uint256 public constant MINIMUM_LIQUIDITY = 10**3;
     bytes4 private constant SELECTOR =
         bytes4(keccak256(bytes("transfer(address,uint256)")));
-
     address public factory;
     address public token0;
     address public token1;
@@ -36,7 +36,7 @@ contract MakiswapPair is MakiswapHRC20 {
 
     uint256 private unlocked = 1;
     modifier lock() {
-        require(unlocked == 1, "MakiswapV2: LOCKED");
+        require(unlocked == 1, "Makiswap: LOCKED");
         unlocked = 0;
         _;
         unlocked = 1;
@@ -65,7 +65,7 @@ contract MakiswapPair is MakiswapHRC20 {
             token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(
             success && (data.length == 0 || abi.decode(data, (bool))),
-            "MakiswapV2: TRANSFER_FAILED"
+            "Makiswap: TRANSFER_FAILED"
         );
     }
 
@@ -135,11 +135,11 @@ contract MakiswapPair is MakiswapHRC20 {
         uint256 _kLast = kLast; // gas savings
         if (feeOn) {
             if (_kLast != 0) {
-                uint256 rootK = Math.sqrt(uint256(_reserve0).mul(_reserve1));
-                uint256 rootKLast = Math.sqrt(_kLast);
+                uint256 rootK = SafeMath.sqrt(uint256(_reserve0).mul(_reserve1));
+                uint256 rootKLast = SafeMath.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint256 numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint256 denominator = rootK.mul(5).add(rootKLast);
+                    uint256 denominator = rootK.mul(3).add(rootKLast);
                     uint256 liquidity = numerator / denominator;
                     if (liquidity > 0) _mint(feeTo, liquidity);
                 }
@@ -160,10 +160,10 @@ contract MakiswapPair is MakiswapHRC20 {
         bool feeOn = _mintFee(_reserve0, _reserve1);
         uint256 _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
-            liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
+            liquidity = SafeMath.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
             _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
         } else {
-            liquidity = Math.min(
+            liquidity = SafeMath.min(
                 amount0.mul(_totalSupply) / _reserve0,
                 amount1.mul(_totalSupply) / _reserve1
             );
@@ -177,11 +177,8 @@ contract MakiswapPair is MakiswapHRC20 {
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function burn(address to)
-        external
-        lock
-        returns (uint256 amount0, uint256 amount1)
-    {
+    function burn(address to) external lock returns (uint256 amount0, uint256 amount1) {
+        require(totalSupply != 0, "The value of totalSupply must not be 0");
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings

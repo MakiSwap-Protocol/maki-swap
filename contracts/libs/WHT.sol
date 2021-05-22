@@ -2,7 +2,7 @@
 pragma solidity >0.4.18;
 
 contract WHT {
-    string public name     = "Wrapped HT";
+    string public name     = "Wrapped Huobi";
     string public symbol   = "WHT";
     uint8  public decimals = 18;
 
